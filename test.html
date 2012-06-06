@@ -9,12 +9,28 @@
 	<script type="text/javascript" src="js/jquery.cryptoprocsp.js"></script>
 	
 	<script type="text/javascript">
-		$("#b_sign").click(function() {
+		$(document).ready(function() { 
+			$.csp(function(r){
+				if(r) {
+					var l = $.csp.certificates();
+					$.each(l, function(i, v) {
+						$("#certs").append("<option value='" + v.sha1 + "'>" + v.subj + "</option>");	
+					});
+				} else alert("CSP Plug-in wasn't installed!");
+			}); 
 
-		});
-
-		$("#b_check").click(function() {
-
+			$("#b_sign").click(function() {
+				var cert = $("#certs").val();
+				if(cert && cert.length > 0) {
+					$("#sign").val($.csp.sign(cert, $("#source").val()));
+				} else {
+					alert("Select the certificate first.");						
+				}
+			});
+			
+			$("#b_check").click(function() {
+				if($.csp.verify($("#sign").val())) alert("Signatute is valid!");
+			});
 		});
 	</script>
 
@@ -24,10 +40,13 @@
 		<h1>Example, just push</h1>
 		<form id="af" action="#" method="GET">
 			<div>
-				<textarea id="source" name="_src" rows="10" cols="70">Yes, its me!</textarea>
+				<select id="certs" size="2"></select>
 			</div>
 			<div>
-				<textarea id="sign" name="_sign" rows="5" cols="70">SIGNATURE</textarea>
+				<textarea id="source" name="_src" rows="10" cols="80">Yes, its me!</textarea>
+			</div>
+			<div>
+				<textarea id="sign" name="_sign" rows="5" cols="80">SIGNATURE</textarea>
 			</div>
 			<div>
 				<input type="button" id="b_sign" value="Sign">
